@@ -9,4 +9,7 @@ Jeu de management de Formule 1 jouable dans le navigateur (HTML/CSS/JS, aucun ou
 
 ## Données
 Écuries, pilotes, numéros, nationalités, circuits et calendrier : saison 2026.
-Statistiques des pilotes, niveaux des voitures, durées de tour et tracés des circuits : estimations du jeu, non officielles.
+Statistiques des pilotes, niveaux des voitures et durées de tour : estimations du jeu, non officielles.
+
+## Tracés des circuits
+La carte de course charge les vrais tracés (fichiers GeoJSON) du dépôt https://github.com/bacinger/f1-circuits (licence MIT, données non officielles) au premier lancement, puis les garde en cache dans le navigateur. Il faut donc une connexion internet au premier lancement. Sans connexion, le jeu affiche des tracés schématiques de secours.
