@@ -2,6 +2,8 @@
 
 Jeu de management de Formule 1 jouable dans le navigateur (HTML/CSS/JS, aucun outil de build).
 
+**Interface refaite** — design premium sombre type F1, typographie Orbitron + Inter, glass cards, accents couleur d’écurie, animations et hiérarchie visuelle renforcée.
+
 ## Publier sur GitHub Pages
 1. Crée un dépôt GitHub, puis envoie le contenu de ce dossier à la racine (index.html, .nojekyll, README.md).
 2. Dépôt > Settings > Pages > Source : "Deploy from a branch", branche `main`, dossier `/ (root)`.
