@@ -12,6 +12,8 @@
 <style>
 
 
+
+
 :root{
   --bg:#02040a;
   --panel:rgba(12,16,26,0.78);
@@ -577,6 +579,75 @@ label{cursor:pointer}
 .flag-sc{background:#f5c542;color:#111}
 .flag-green{background:#2ee6a0;color:#062}
 
+
+/* F1 2D car stage */
+.car-stage{
+  padding:18px 16px 14px;margin-bottom:8px;
+  background:linear-gradient(180deg,rgba(12,16,28,0.95),rgba(6,9,16,0.98));
+  border:1px solid var(--line);border-radius:18px;
+  box-shadow:inset 0 0 60px rgba(0,0,0,0.35);
+}
+.car-stage-hd{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px}
+.f1car{width:100%;height:auto;display:block;max-height:200px}
+.f1car .czone{transition:opacity 0.15s}
+.f1car .czone:hover{opacity:0.92;filter:brightness(1.12)}
+.car-legend{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;justify-content:center;
+}
+.car-legend button{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 12px;font-size:12px;border-radius:100px;
+  background:rgba(255,255,255,0.03);
+}
+.car-legend button i{
+  width:8px;height:8px;border-radius:50%;display:inline-block;
+  box-shadow:0 0 8px currentColor;
+}
+
+/* Upgrade modal */
+.car-modal{
+  position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;
+  padding:20px;opacity:0;pointer-events:none;transition:opacity 0.22s ease;
+}
+.car-modal.show{opacity:1;pointer-events:auto}
+.car-modal-bg{
+  position:absolute;inset:0;background:rgba(2,4,10,0.72);
+  backdrop-filter:blur(10px);
+}
+.car-modal-card{
+  position:relative;z-index:1;width:min(480px,100%);
+  background:linear-gradient(165deg,rgba(16,20,32,0.96),rgba(8,11,18,0.98));
+  border:1px solid var(--line2);border-radius:22px;padding:22px 22px 20px;
+  box-shadow:0 40px 100px rgba(0,0,0,0.65),0 0 0 1px color-mix(in srgb,var(--a) 20%,transparent);
+  transform:translateY(12px) scale(0.97);transition:transform 0.28s var(--out);
+}
+.car-modal.show .car-modal-card{transform:none}
+.car-modal-x{
+  position:absolute;top:12px;right:12px;width:36px;height:36px;padding:0;
+  border-radius:50%;font-size:14px;color:var(--muted);
+}
+.car-modal-preview{
+  background:#060a12;border-radius:14px;padding:8px;margin-bottom:14px;
+  border:1px solid var(--line);overflow:hidden;
+}
+.car-modal-preview .f1car{max-height:150px}
+.car-modal-card h3{
+  font-family:var(--display);font-size:18px;letter-spacing:0.06em;margin-bottom:6px;
+}
+.car-modal-stat{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin:14px 0 6px;font-size:13px;color:var(--muted);
+}
+.car-modal-stat strong{font-family:var(--display);font-size:22px;color:var(--text)}
+.bar.big{height:10px;margin:8px 0 18px}
+.car-modal-actions{display:flex;gap:10px;flex-wrap:wrap}
+.car-modal-actions .p{flex:1;min-width:160px}
+
+
+.team-mini{margin:0 -6px 10px;opacity:0.9;pointer-events:none}
+.team-mini .f1car{max-height:72px;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.4))}
+.team-mini text{display:none}
+
 </style>
 </head>
 <body>
@@ -589,20 +660,22 @@ label{cursor:pointer}
 
 
 
+
+
 const $=q=>document.querySelector(q),ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),A=$('#app');
 // Écuries, pilotes, numéros, nationalités : saison 2026. Niveau voiture & stats [pure,course,régularité,dépassement,pneus,pluie] : estimations du jeu.
 const T=[
-["Red Bull Racing","#3671C6",84,"Ford",[["Max Verstappen",3,"NED",98,97,94,95,90,93],["Isack Hadjar",6,"FRA",82,80,72,76,74,72]]],
-["Racing Bulls","#6692FF",72,"Ford",[["Liam Lawson",30,"NZL",80,80,76,78,76,74],["Arvid Lindblad",41,"GBR",78,76,70,74,72,70]]],
-["Mercedes","#27F4D2",90,"Mercedes",[["George Russell",63,"GBR",92,91,92,86,88,88],["Kimi Antonelli",12,"ITA",90,86,78,84,80,86]]],
-["Ferrari","#E80020",86,"Ferrari",[["Charles Leclerc",16,"MON",95,92,86,88,86,88],["Lewis Hamilton",44,"GBR",91,91,92,90,92,95]]],
-["McLaren","#FF8000",86,"Mercedes",[["Lando Norris",1,"GBR",94,94,90,88,90,86],["Oscar Piastri",81,"AUS",93,92,92,90,88,84]]],
-["Aston Martin","#229971",70,"Honda",[["Fernando Alonso",14,"ESP",91,93,92,96,92,94],["Lance Stroll",18,"CAN",78,76,72,70,72,82]]],
-["Alpine","#0093CC",68,"Mercedes",[["Pierre Gasly",10,"FRA",86,86,85,82,84,86],["Franco Colapinto",43,"ARG",80,78,70,76,72,74]]],
-["Williams","#64C4FF",73,"Mercedes",[["Alexander Albon",23,"THA",86,86,88,84,88,84],["Carlos Sainz",55,"ESP",88,88,90,86,88,84]]],
-["Haas","#B6BABD",68,"Ferrari",[["Esteban Ocon",31,"FRA",84,83,82,82,80,82],["Oliver Bearman",87,"GBR",82,82,78,80,78,78]]],
-["Audi","#C8102E",70,"Audi",[["Nico Hülkenberg",27,"GER",85,85,86,84,84,88],["Gabriel Bortoleto",5,"BRA",82,81,76,80,78,76]]],
-["Cadillac","#9AA3AD",62,"Ferrari",[["Sergio Pérez",11,"MEX",82,82,80,84,86,76],["Valtteri Bottas",77,"FIN",83,83,85,80,84,80]]]];
+["Red Bull Racing","#1E5BC6",84,"Ford",[["Max Verstappen",3,"NED",98,97,94,95,90,93],["Isack Hadjar",6,"FRA",82,80,72,76,74,72]]],
+["Racing Bulls","#5B8DEF",72,"Ford",[["Liam Lawson",30,"NZL",80,80,76,78,76,74],["Arvid Lindblad",41,"GBR",78,76,70,74,72,70]]],
+["Mercedes","#00D2BE",90,"Mercedes",[["George Russell",63,"GBR",92,91,92,86,88,88],["Kimi Antonelli",12,"ITA",90,86,78,84,80,86]]],
+["Ferrari","#E10600",86,"Ferrari",[["Charles Leclerc",16,"MON",95,92,86,88,86,88],["Lewis Hamilton",44,"GBR",91,91,92,90,92,95]]],
+["McLaren","#FF8700",86,"Mercedes",[["Lando Norris",1,"GBR",94,94,90,88,90,86],["Oscar Piastri",81,"AUS",93,92,92,90,88,84]]],
+["Aston Martin","#006F62",70,"Honda",[["Fernando Alonso",14,"ESP",91,93,92,96,92,94],["Lance Stroll",18,"CAN",78,76,72,70,72,82]]],
+["Alpine","#FF87BC",68,"Mercedes",[["Pierre Gasly",10,"FRA",86,86,85,82,84,86],["Franco Colapinto",43,"ARG",80,78,70,76,72,74]]],
+["Williams","#00A3E0",73,"Mercedes",[["Alexander Albon",23,"THA",86,86,88,84,88,84],["Carlos Sainz",55,"ESP",88,88,90,86,88,84]]],
+["Haas","#E6002B",68,"Ferrari",[["Esteban Ocon",31,"FRA",84,83,82,82,80,82],["Oliver Bearman",87,"GBR",82,82,78,80,78,78]]],
+["Audi","#F50537",70,"Audi",[["Nico Hülkenberg",27,"GER",85,85,86,84,84,88],["Gabriel Bortoleto",5,"BRA",82,81,76,80,78,76]]],
+["Cadillac","#A7ADB5",62,"Ferrari",[["Sergio Pérez",11,"MEX",82,82,80,84,86,76],["Valtteri Bottas",77,"FIN",83,83,85,80,84,80]]]];
 const D=T.flatMap((t,ti)=>t[4].map((d,k)=>({id:ti*2+k,ti,name:d[0],n:d[1],nat:d[2],s:d.slice(3)})));
 // [GP, circuit, date, tours, durée de tour (s, estimée), proba voiture de sécurité, facilité de dépassement]
 const CAL=[["Australie","Albert Park","8 mars",58,80,.02,.22],["Chine","Shanghai","15 mars",56,95,.012,.35],["Japon","Suzuka","29 mars",53,91,.012,.22],["Bahreïn","Sakhir","12 avril",57,92,.01,.4],["Arabie saoudite","Djeddah","19 avril",50,90,.025,.3],["Miami","Miami International Autodrome","3 mai",57,90,.015,.3],["Canada","Circuit Gilles-Villeneuve","24 mai",70,76,.025,.3],["Monaco","Circuit de Monaco","7 juin",78,72,.02,.06],["Espagne (Barcelone)","Barcelona-Catalunya","14 juin",66,78,.008,.2],["Autriche","Red Bull Ring","28 juin",71,66,.012,.4],["Grande-Bretagne","Silverstone","5 juillet",52,88,.012,.3],["Belgique","Spa-Francorchamps","19 juillet",44,106,.015,.4],["Hongrie","Hungaroring","26 juillet",70,78,.01,.15],["Pays-Bas","Zandvoort","23 août",72,72,.012,.15],["Italie","Monza","6 septembre",53,81,.012,.45],["Espagne (Madrid)","Madring","13 septembre",57,90,.015,.2],["Azerbaïdjan","Bakou","26 septembre",51,103,.03,.45],["Singapour","Marina Bay","11 octobre",62,96,.03,.15],["États-Unis","Circuit of the Americas","25 octobre",56,98,.015,.35],["Mexique","Hermanos Rodríguez","1 novembre",71,77,.012,.3],["Brésil","Interlagos","8 novembre",71,70,.02,.4],["Las Vegas","Las Vegas Strip Circuit","21 novembre",50,96,.015,.45],["Qatar","Lusail","29 novembre",57,84,.012,.25],["Abu Dhabi","Yas Marina","6 décembre",58,86,.012,.25]];
@@ -651,23 +724,139 @@ function confetti(){const c=document.createElement('div');c.className='confetti-
 const TIPS=["En sec, change de composé au moins une fois sinon +20 s.","Monaco et Hongrie : dépassements rares — la qualification est cruciale.","Monza et Bakou : freinages violents, bons endroits pour attaquer.","Sous voiture de sécurité, les écarts se resserrent : c’est le moment de boxer.","La pluie arrive parfois en course : garde des inters en réserve.","Améliore d’abord l’aéro et le moteur : impact le plus fort sur le temps au tour.","Un bon stratège gère les arrêts pour toi — utile en multi-arrêts.","Le budget suit le classement constructeurs : chaque point compte."];
 function tip(){return TIPS[Math.floor(Math.random()*TIPS.length)]}
 function menu(){const s=load();document.documentElement.style.removeProperty('--a');document.body.className='page-menu';
-A.innerHTML=`<div class="shell menu-shell"><header class="hero"><div class="hero-badge">SAISON 2026</div><h1>F1 MANAGER</h1><p class="lead">Sélectionne ton écurie. Chaque décision compte — développement, stratégie, gestion du budget.</p>${s?`<button class="p big" onclick="sfx('click');G=load();hub('eq')">Continuer — ${T[s.t][0]} · GP ${Math.min(s.r+1,24)}/24</button>`:''}</header><div class="team-grid">${T.map((t,i)=>`<article class="team-card" style="--tc:${t[1]};animation-delay:${i*0.04}s"><div class="team-stripe"></div><div class="team-body"><h3>${t[0]}</h3><div class="team-meta">Moteur ${t[3]} · Base ${t[2]}</div><div class="drivers">${t[4].map(d=>`<div><span class="num" style="color:${t[1]}">#${d[1]}</span> ${d[0]} <em>${d[2]}</em></div>`).join('')}</div><button onclick="sfx('click');newGame(${i})">Diriger</button></div></article>`).join('')}</div><footer class="foot">${note}</footer></div>`}
+A.innerHTML=`<div class="shell menu-shell"><header class="hero"><div class="hero-badge">SAISON 2026</div><h1>F1 MANAGER</h1><p class="lead">Sélectionne ton écurie. Chaque décision compte — développement, stratégie, gestion du budget.</p>${s?`<button class="p big" onclick="sfx('click');G=load();hub('eq')">Continuer — ${T[s.t][0]} · GP ${Math.min(s.r+1,24)}/24</button>`:''}</header><div class="team-grid">${T.map((t,i)=>`<article class="team-card" style="--tc:${t[1]};animation-delay:${i*0.04}s"><div class="team-stripe"></div><div class="team-body"><div class="team-mini">${carSVG(t[1])}</div><h3>${t[0]}</h3><div class="team-meta">Moteur ${t[3]} · Base ${t[2]}</div><div class="drivers">${t[4].map(d=>`<div><span class="num" style="color:${t[1]}">#${d[1]}</span> ${d[0]} <em>${d[2]}</em></div>`).join('')}</div><button onclick="sfx('click');newGame(${i})">Diriger</button></div></article>`).join('')}</div><footer class="foot">${note}</footer></div>`}
 function newGame(i){G={t:i,r:0,$:120,car:T.map(t=>({a:t[2]+ri(-3,3),p:t[2]+ri(-3,3),c:t[2]+ri(-3,3),f:Math.min(97,t[2]+6+ri(-4,3))})),dp:Array(22).fill(0),tp:Array(11).fill(0),w:[],hist:[],sfx:1};save();hub('eq')}
 const avg=i=>(G.car[i].a+G.car[i].p+G.car[i].c)/3;
 function up(k){const c=G.car[G.t],cost=Math.round(4+(c[k]-55)*.3);if(G.$<cost||c[k]>=99)return;G.$-=cost;c[k]=Math.min(99,c[k]+2);save();hub('eq')}
+
+function carSVG(col, hi){
+  // top-down-ish side view F1 car, clickable zones: a=front wing, p=engine, c=sidepods/chassis, f=floor/rear
+  const h = hi||'';
+  const glow = (k)=> h===k ? `filter:url(#cg);stroke:#fff;stroke-width:1.2` : `stroke:rgba(0,0,0,0.35);stroke-width:0.6`;
+  const fill = (k,base)=> h===k ? base : base;
+  return `<svg class="f1car" viewBox="0 0 520 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Monoplace">
+  <defs>
+    <linearGradient id="cb" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="${col}" stop-opacity="0.85"/><stop offset="50%" stop-color="${col}"/><stop offset="100%" stop-color="${col}" stop-opacity="0.75"/></linearGradient>
+    <linearGradient id="cd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fff" stop-opacity="0.25"/><stop offset="40%" stop-color="#fff" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity="0.35"/></linearGradient>
+    <filter id="cg"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#fff" flood-opacity="0.7"/></filter>
+  </defs>
+  <!-- shadow -->
+  <ellipse cx="270" cy="148" rx="200" ry="8" fill="#000" opacity="0.35"/>
+  <!-- floor / reliability zone -->
+  <g class="czone" data-part="f" onclick="openPart('f')" style="cursor:pointer">
+    <path d="M90 118 H430 L400 128 H120 Z" fill="#1a1e28" opacity="0.9"/>
+    <path d="M100 112 H410" stroke="${col}" stroke-width="2" opacity="0.5"/>
+    <rect x="140" y="108" width="220" height="14" rx="2" fill="${col}" opacity="${h==='f'?0.95:0.55}" style="${glow('f')}"/>
+  </g>
+  <!-- rear wing -->
+  <g class="czone" data-part="a" onclick="openPart('a')" style="cursor:pointer">
+    <rect x="42" y="48" width="8" height="55" rx="1" fill="#222"/>
+    <rect x="28" y="42" width="36" height="6" rx="1" fill="${col}" opacity="${h==='a'?1:0.9}" style="${glow('a')}"/>
+    <rect x="30" y="55" width="32" height="4" rx="1" fill="${col}" opacity="0.7"/>
+    <rect x="32" y="66" width="28" height="3" rx="1" fill="#ccc" opacity="0.5"/>
+  </g>
+  <!-- nose + front wing (aero) -->
+  <g class="czone" data-part="a" onclick="openPart('a')" style="cursor:pointer">
+    <path d="M455 88 L505 92 L505 100 L455 104 Z" fill="${col}" opacity="${h==='a'?1:0.92}" style="${glow('a')}"/>
+    <path d="M448 78 L500 84 L498 90 L448 88 Z" fill="#222"/>
+    <path d="M448 104 L500 98 L498 106 L448 110 Z" fill="#222"/>
+    <rect x="430" y="86" width="28" height="12" rx="3" fill="${col}"/>
+  </g>
+  <!-- chassis / sidepods -->
+  <g class="czone" data-part="c" onclick="openPart('c')" style="cursor:pointer">
+    <path d="M120 70 C160 52, 220 48, 280 52 L360 58 C400 60, 430 72, 445 88 L445 100 C420 118, 360 122, 280 120 C200 118, 150 112, 120 100 Z" fill="url(#cb)" opacity="${h==='c'?1:0.95}" style="${glow('c')}"/>
+    <path d="M120 70 C160 52, 220 48, 280 52 L360 58 C400 60, 430 72, 445 88 L300 88 L120 95 Z" fill="url(#cd)"/>
+    <!-- cockpit -->
+    <ellipse cx="210" cy="78" rx="28" ry="16" fill="#0a0c12" opacity="0.85"/>
+    <ellipse cx="210" cy="78" rx="18" ry="10" fill="#1a2030"/>
+    <rect x="198" y="70" width="20" height="8" rx="2" fill="#2a3348"/>
+  </g>
+  <!-- engine cover -->
+  <g class="czone" data-part="p" onclick="openPart('p')" style="cursor:pointer">
+    <path d="M95 78 C110 58, 140 55, 165 62 L175 95 C150 100, 120 98, 100 95 Z" fill="${col}" opacity="${h==='p'?1:0.88}" style="${glow('p')}"/>
+    <path d="M100 72 L155 65 L160 88 L105 90 Z" fill="#000" opacity="0.2"/>
+    <path d="M112 60 L125 48 L135 52 L128 68 Z" fill="#333"/>
+    <rect x="118" y="48" width="6" height="14" fill="#555"/>
+  </g>
+  <!-- wheels -->
+  <g fill="#111" stroke="#444" stroke-width="1.5">
+    <ellipse cx="400" cy="118" rx="22" ry="14"/><ellipse cx="400" cy="118" rx="12" ry="7" fill="#333"/>
+    <ellipse cx="145" cy="118" rx="22" ry="14"/><ellipse cx="145" cy="118" rx="12" ry="7" fill="#333"/>
+  </g>
+  <!-- halo -->
+  <path d="M195 68 C200 58, 220 56, 228 68" fill="none" stroke="#888" stroke-width="2.5"/>
+  <!-- labels hint -->
+  <text x="260" y="20" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="10" font-family="Inter,sans-serif">Clique une zone pour développer</text>
+</svg>`;
+}
+function openPart(k){
+  const n={a:'Aérodynamique',p:'Moteur',c:'Châssis',f:'Fiabilité'};
+  const desc={
+    a:'Ailerons, diffuseur et flux d’air. Impact direct sur l’appui et la vitesse en courbe.',
+    p:'Unité de puissance et récupération d’énergie. Détermine la pointe de vitesse.',
+    c:'Structure, sidepods et rigidité. Équilibre et comportement global.',
+    f:'Fiabilité mécanique et refroidissement. Réduit les risques d’abandon.'
+  };
+  const c=G.car[G.t], cost=Math.round(4+(c[k]-55)*.3);
+  const col=T[G.t][1];
+  const maxed=c[k]>=99, poor=G.$<cost;
+  let modal=$('#carModal');
+  if(!modal){
+    modal=document.createElement('div');modal.id='carModal';modal.className='car-modal';
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML=`<div class="car-modal-bg" onclick="closePart()"></div>
+  <div class="car-modal-card" style="--a:${col}">
+    <button class="car-modal-x" onclick="closePart()">✕</button>
+    <div class="car-modal-preview">${carSVG(col,k)}</div>
+    <h3>${n[k]}</h3>
+    <p class="mut">${desc[k]}</p>
+    <div class="car-modal-stat"><span>Niveau</span><strong>${c[k]} / 99</strong></div>
+    <div class="bar big"><i style="width:${c[k]}%"></i></div>
+    <div class="car-modal-actions">
+      <button class="p" ${maxed||poor?'disabled':''} onclick="upgradePart('${k}')">${maxed?'Niveau max':poor?'Budget insuffisant':`Améliorer +2 · ${cost} M$`}</button>
+      <button class="ghost" onclick="closePart()">Fermer</button>
+    </div>
+  </div>`;
+  requestAnimationFrame(()=>modal.classList.add('show'));
+}
+function closePart(){
+  const m=$('#carModal');if(!m)return;
+  m.classList.remove('show');
+  setTimeout(()=>m.remove(),220);
+}
+function upgradePart(k){
+  const before=G.car[G.t][k];
+  up(k);
+  if(G.car[G.t][k]===before)return;
+  sfx('up');
+  hub('eq');
+  openPart(k);
+}
+
 const rank=(arr,i)=>arr.map((v,k)=>[v,k]).sort((a,b)=>b[0]-a[0]||a[1]-b[1]).findIndex(x=>x[1]==i)+1;
 const STF=[["Léa Marchand",62,3],["Tom Vasseur",78,5],["Éva Delcourt",92,8]];let UNL=0;
 const hire=i=>{G.st=i<0?null:STF[i];save();hub('st')},cp=n=>{G.dp[+$('#cd').value]+=n;G.tp[G.t]+=n;save();hub('st')},unl=()=>{if($('#cc').value=='0000'){UNL=1;hub('st')}else toast('Code incorrect')};
 const cheat=()=>UNL?`<h2>Coulisses du staff</h2><div class=grid><div class=card><b>Budget (M$)</b><br><input type=number id=cb value=${Math.round(G.$)} style="width:90px;padding:6px"> <button onclick="G.$=+$('#cb').value;save();hub('st')">Appliquer</button></div>${['a','p','c','f'].map(k=>`<div class=card><b>${{a:'Aérodynamique',p:'Moteur',c:'Châssis',f:'Fiabilité'}[k]}</b> <span id=v${k}>${G.car[G.t][k]}</span><br><input type=range min=40 max=99 value=${G.car[G.t][k]} oninput="G.car[G.t].${k}=+this.value;$('#v${k}').textContent=this.value;save()"></div>`).join('')}<div class=card><b>Course</b><br><label><input type=checkbox ${G.rainF?'checked':''} onchange="G.rainF=this.checked;save()"> Pluie au prochain GP</label><br><label><input type=checkbox ${G.noInc?'checked':''} onchange="G.noInc=this.checked;save()"> Aucun incident ni panne</label></div><div class=card><b>Points</b><br><select id=cd>${D.filter(d=>d.ti==G.t).map(d=>`<option value=${d.id}>${d.name}</option>`).join('')}</select> <button onclick="cp(25)">+25 pts</button></div></div>`:`<h2>Accès staff</h2><p class=mut>Entre le code pour ouvrir les coulisses.</p><input id=cc type=password placeholder="Code" style="padding:7px"> <button onclick="unl()">Valider</button>`;
 const V={st:()=>`<h2>Stratèges</h2><p class="lead">Un stratège gère arrêts et pneus à ta place. Niveau élevé = meilleures décisions sous SC. Salaire prélevé après chaque GP.</p><div class="grid">${STF.map((x,i)=>`<div class="card stagger" style="--d:${i*.05}s"><b>${x[0]}</b><span class="mut">Niveau ${x[1]}</span><div class="bar"><i style="width:${x[1]}%"></i></div><div class="mut">Salaire ${x[2]} M$ / GP</div><p>${G.st&&G.st[0]==x[0]?`<button onclick="sfx('click');hire(-1)">Licencier</button>`:`<button class="p" onclick="sfx('click');hire(${i})">Engager</button>`}</p></div>`).join('')}</div>${cheat()}`,
-eq:()=>{const c=G.car[G.t],n={a:'Aérodynamique',p:'Moteur',c:'Châssis',f:'Fiabilité'};
+eq:()=>{const c=G.car[G.t],n={a:'Aérodynamique',p:'Moteur',c:'Châssis',f:'Fiabilité'},col=T[G.t][1];
 const rivals=T.map((_,i)=>({i,v:avg(i)})).sort((a,b)=>b.v-a.v).slice(0,5);
-return `<p class="lead">Voiture <b>${rank(T.map((_,i)=>avg(i)),G.t)}e / 11</b>. Améliore les composants — les points alimentent le budget.</p>
+return `<p class="lead">Voiture <b>${rank(T.map((_,i)=>avg(i)),G.t)}e / 11</b>. Clique sur une zone de la monoplace pour développer ce secteur.</p>
+<div class="car-stage card">
+  <div class="car-stage-hd"><span class="mut">Monoplace ${T[G.t][0]}</span><span class="mut">Budget ${Math.round(G.$)} M$</span></div>
+  ${carSVG(col)}
+  <div class="car-legend">
+    <button type="button" onclick="openPart('a')"><i style="background:${col}"></i>Aéro ${c.a}</button>
+    <button type="button" onclick="openPart('p')"><i style="background:${col}"></i>Moteur ${c.p}</button>
+    <button type="button" onclick="openPart('c')"><i style="background:${col}"></i>Châssis ${c.c}</button>
+    <button type="button" onclick="openPart('f')"><i style="background:${col}"></i>Fiabilité ${c.f}</button>
+  </div>
+</div>
 <div class="compare">
   <h2>Comparaison (moy. aéro/moteur/châssis)</h2>
   <div class="cmp-rows">${rivals.map(({i,v})=>{const mine=i===G.t;return `<div class="cmp-row ${mine?'me':''}"><span class="cmp-name"><i class="dot" style="background:${T[i][1]}"></i>${T[i][0]}</span><div class="cmp-bar"><i style="width:${v}%;background:${T[i][1]}"></i></div><span class="cmp-val">${v.toFixed(0)}</span></div>`}).join('')}</div>
 </div>
-<h2>Développement</h2><div class="grid">${Object.keys(n).map((k,idx)=>{const cost=Math.round(4+(c[k]-55)*.3);return `<div class="card stagger" style="--d:${idx*.05}s"><b>${n[k]}</b><span class="mut">${c[k]} / 99</span><div class="bar"><i style="width:${c[k]}%"></i></div><button ${G.$<cost||c[k]>=99?'disabled':''} onclick="sfx('up');up('${k}')">+2 · ${cost} M$</button></div>`}).join('')}</div>
+<h2>Développement rapide</h2><div class="grid">${Object.keys(n).map((k,idx)=>{const cost=Math.round(4+(c[k]-55)*.3);return `<div class="card stagger" style="--d:${idx*.05}s" onclick="openPart('${k}')" role="button"><b>${n[k]}</b><span class="mut">${c[k]} / 99</span><div class="bar"><i style="width:${c[k]}%"></i></div><button ${G.$<cost||c[k]>=99?'disabled':''} onclick="event.stopPropagation();sfx('up');up('${k}');hub('eq')">+2 · ${cost} M$</button></div>`}).join('')}</div>
 <h2>Tes pilotes</h2><div class="grid">${D.filter(d=>d.ti==G.t).map((d,idx)=>`<div class="card stagger" style="--d:${idx*.05}s"><b>#${d.n} ${d.name}</b><span class="mut">${d.nat}</span><div class="pilot-stats"><div><em>Points</em><strong>${G.dp[d.id]}</strong></div><div><em>Pure</em><strong>${d.s[0]}</strong></div><div><em>Course</em><strong>${d.s[1]}</strong></div><div><em>Régul.</em><strong>${d.s[2]}</strong></div></div></div>`).join('')}</div>
 ${G.hist&&G.hist.length?`<h2>Derniers résultats</h2><div class="hist">${G.hist.slice(-6).map(h=>`<div class="hist-item"><span class="hist-gp">${h.gp}</span><span class="hist-pos pos-${Math.min(h.pos,11)}">P${h.pos}</span><span class="hist-pts">+${h.pts} pts</span></div>`).join('')}</div>`:''}`},
 pi:()=>`<h2>Pilotes & stats</h2><div class="sc"><table><thead><tr><th>#</th><th>Pilote</th><th>Nat.</th><th>Écurie</th><th>Pure</th><th>Course</th><th>Régul.</th><th>Dépass.</th><th>Pneus</th><th>Pluie</th></tr></thead><tbody>${D.map(d=>`<tr class="${d.ti==G.t?'me':''}"><td>${d.n}</td><td><i class="dot" style="background:${T[d.ti][1]}"></i>${d.name}</td><td>${d.nat}</td><td>${T[d.ti][0]}</td>${d.s.map(v=>'<td>'+v+'</td>').join('')}</tr>`).join('')}</tbody></table></div>`,
@@ -992,6 +1181,8 @@ function splash(){
 }
 
 splash();loadReal();
+
+
 
 
 
