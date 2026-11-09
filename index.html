@@ -18,6 +18,7 @@
 
 
 
+
 :root{
   --bg:#02040a;
   --panel:rgba(12,16,26,0.78);
@@ -745,12 +746,24 @@ label{cursor:pointer}
 }
 .team-mini .f1car-ref{aspect-ratio:800/602;max-height:88px}
 
+
+.f1car-ref.sideview{aspect-ratio:1000/560;max-width:900px;width:100%;margin:0 auto}
+.f1car-ref.sideview .f1car-img{
+  width:100%;height:100%;object-fit:contain;
+  filter:drop-shadow(0 16px 28px rgba(0,0,0,0.4));
+}
+.team-mini .f1car-ref.sideview{max-height:86px;aspect-ratio:1000/560}
+.car-stage{
+  background:radial-gradient(ellipse at 50% 60%,#2a3142 0%,#12161f 55%,#0a0e14 100%);
+}
+
 </style>
 </head>
 <body>
 <div id="toasts"></div>
 <div id="app"></div>
 <script>
+
 
 
 
@@ -825,25 +838,35 @@ function confetti(){const c=document.createElement('div');c.className='confetti-
 const TIPS=["En sec, change de composé au moins une fois sinon +20 s.","Monaco et Hongrie : dépassements rares — la qualification est cruciale.","Monza et Bakou : freinages violents, bons endroits pour attaquer.","Sous voiture de sécurité, les écarts se resserrent : c’est le moment de boxer.","La pluie arrive parfois en course : garde des inters en réserve.","Améliore d’abord l’aéro et le moteur : impact le plus fort sur le temps au tour.","Un bon stratège gère les arrêts pour toi — utile en multi-arrêts.","Le budget suit le classement constructeurs : chaque point compte."];
 function tip(){return TIPS[Math.floor(Math.random()*TIPS.length)]}
 function menu(){const s=load();document.documentElement.style.removeProperty('--a');document.body.className='page-menu';
-A.innerHTML=`<div class="shell menu-shell"><header class="hero"><div class="hero-badge">SAISON 2026</div><h1>F1 MANAGER</h1><p class="lead">Sélectionne ton écurie. Chaque décision compte — développement, stratégie, gestion du budget.</p>${s?`<button class="p big" onclick="sfx('click');G=load();hub('eq')">Continuer — ${T[s.t][0]} · GP ${Math.min(s.r+1,24)}/24</button>`:''}</header><div class="team-grid">${T.map((t,i)=>`<article class="team-card" style="--tc:${t[1]};animation-delay:${i*0.04}s"><div class="team-stripe"></div><div class="team-body"><div class="team-mini">${carSVG(t[1])}</div><h3>${t[0]}</h3><div class="team-meta">Moteur ${t[3]} · Base ${t[2]}</div><div class="drivers">${t[4].map(d=>`<div><span class="num" style="color:${t[1]}">#${d[1]}</span> ${d[0]} <em>${d[2]}</em></div>`).join('')}</div><button onclick="sfx('click');newGame(${i})">Diriger</button></div></article>`).join('')}</div><footer class="foot">${note}</footer></div>`}
+A.innerHTML=`<div class="shell menu-shell"><header class="hero"><div class="hero-badge">SAISON 2026</div><h1>F1 MANAGER</h1><p class="lead">Sélectionne ton écurie. Chaque décision compte — développement, stratégie, gestion du budget.</p>${s?`<button class="p big" onclick="sfx('click');G=load();hub('eq')">Continuer — ${T[s.t][0]} · GP ${Math.min(s.r+1,24)}/24</button>`:''}</header><div class="team-grid">${T.map((t,i)=>`<article class="team-card" style="--tc:${t[1]};animation-delay:${i*0.04}s"><div class="team-stripe"></div><div class="team-body"><div class="team-mini">${carSVG(t[1],null,i)}</div><h3>${t[0]}</h3><div class="team-meta">Moteur ${t[3]} · Base ${t[2]}</div><div class="drivers">${t[4].map(d=>`<div><span class="num" style="color:${t[1]}">#${d[1]}</span> ${d[0]} <em>${d[2]}</em></div>`).join('')}</div><button onclick="sfx('click');newGame(${i})">Diriger</button></div></article>`).join('')}</div><footer class="foot">${note}</footer></div>`}
 function newGame(i){G={t:i,r:0,$:120,car:T.map(t=>({a:t[2]+ri(-3,3),p:t[2]+ri(-3,3),c:t[2]+ri(-3,3),f:Math.min(97,t[2]+6+ri(-4,3))})),dp:Array(22).fill(0),tp:Array(11).fill(0),w:[],hist:[],sfx:1};save();hub('eq')}
 const avg=i=>(G.car[i].a+G.car[i].p+G.car[i].c)/3;
 function up(k){const c=G.car[G.t],cost=Math.round(4+(c[k]-55)*.3);if(G.$<cost||c[k]>=99)return;G.$-=cost;c[k]=Math.min(99,c[k]+2);save();hub('eq')}
 
 
-function carSVG(col, hi){
+
+// Images monoplaces par écurie (ordre = index T). null = fallback teinté.
+const CAR_IMG=["cars/00-redbull.png","cars/01-racingbulls.png","cars/02-mercedes.png","cars/03-ferrari.png","cars/04-mclaren.png","cars/05-astonmartin.png","cars/06-alpine.png","cars/07-williams.png","cars/08-haas.png","cars/09-audi.png","cars/10-cadillac.png"];
+function carSrc(ti){
+  const p=CAR_IMG[ti];
+  // si le fichier n'est pas encore fourni, fallback image générique
+  return p||'f1car.png';
+}
+function carSVG(col, hi, ti){
+  if(ti===undefined) ti=G?G.t:0;
+  const src=carSrc(ti);
+  const hasReal=true; // images dédiées (teint léger désactivé pour garder la livrée)
   const z=(k,label,st)=>`<button type="button" class="car-hot ${hi===k?'on':''}" data-part="${k}" style="${st}" onclick="event.stopPropagation();openPart('${k}')" title="${label}"><span>${label}</span></button>`;
-  return `<div class="f1car-ref topdown" style="--team:${col}">
+  return `<div class="f1car-ref sideview" style="--team:${col}">
     <div class="f1car-stack">
-      <img class="f1car-img" alt="F1 2026" draggable="false" src="f1car.png"/>
-      <div class="f1car-tint"></div>
+      <img class="f1car-img" alt="${T[ti][0]}" draggable="false" src="${src}" onerror="this.onerror=null;this.src='f1car.png'"/>
     </div>
     <div class="car-hots">
-      ${z('a','Aéro','left:1%;width:16%;top:18%;height:64%')}
-      ${z('c','Châssis','left:18%;width:32%;top:20%;height:60%')}
-      ${z('p','Moteur','left:50%;width:24%;top:22%;height:56%')}
-      ${z('a','Aéro','left:74%;width:24%;top:15%;height:70%')}
-      ${z('f','Fiabilité','left:15%;width:60%;top:78%;height:18%')}
+      ${z('a','Aéro','left:0%;width:18%;top:25%;height:55%')}
+      ${z('c','Châssis','left:22%;width:36%;top:28%;height:50%')}
+      ${z('p','Moteur','left:55%;width:22%;top:20%;height:52%')}
+      ${z('a','Aéro','left:78%;width:20%;top:18%;height:58%')}
+      ${z('f','Fiabilité','left:18%;width:55%;top:72%;height:20%')}
     </div>
   </div>`;
 }
@@ -867,7 +890,7 @@ function openPart(k){
   modal.innerHTML=`<div class="car-modal-bg" onclick="closePart()"></div>
   <div class="car-modal-card" style="--a:${col}">
     <button class="car-modal-x" onclick="closePart()">✕</button>
-    <div class="car-modal-preview">${carSVG(col,k)}</div>
+    <div class="car-modal-preview">${carSVG(col,k,G.t)}</div>
     <h3>${n[k]}</h3>
     <p class="mut">${desc[k]}</p>
     <div class="car-modal-stat"><span>Niveau</span><strong>${c[k]} / 99</strong></div>
@@ -903,7 +926,7 @@ const rivals=T.map((_,i)=>({i,v:avg(i)})).sort((a,b)=>b.v-a.v).slice(0,5);
 return `<p class="lead">Voiture <b>${rank(T.map((_,i)=>avg(i)),G.t)}e / 11</b>. Utilise la monoplace ou le menu d’amélioration ci-dessous.</p>
 <div class="car-stage">
   <div class="car-stage-hd"><span>Monoplace · ${T[G.t][0]}</span><span class="mut">Budget ${Math.round(G.$)} M$</span></div>
-  ${carSVG(col)}
+  ${carSVG(col,null,G.t)}
 </div>
 <h2>Développement</h2>
 <div class="grid">${Object.keys(n).map((k,idx)=>{const cost=Math.round(4+(c[k]-55)*.3);return `<div class="card stagger" style="--d:${idx*.05}s"><b>${n[k]}</b><span class="mut">${c[k]} / 99</span><div class="bar"><i style="width:${c[k]}%"></i></div><button ${G.$<cost||c[k]>=99?'disabled':''} onclick="sfx('up');up('${k}');hub('eq')">+2 · ${cost} M$</button></div>`}).join('')}</div>
@@ -1235,6 +1258,7 @@ function splash(){
 }
 
 splash();loadReal();
+
 
 
 
